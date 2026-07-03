@@ -1,35 +1,32 @@
-import http from 'http';
-import fs from 'fs';
+import express from 'express';
+import path from 'path'
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-const server = http.createServer((req, res) => {
-    let filePath;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-    if(req.url === '/' || req.url === '/index') {
-        filePath = 'index.html';
-    } else if (req.url === '/about') {
-        filePath = 'about.html';
-    } else if (req.url === '/contact-me') {
-        filePath = 'contact-me.html';
-    } else {
-        filePath = '404.html';
-    }
+const app = express();
 
-    fs.readFile(filePath, (err, data) => {
-        if (err) {
-            res.writeHead(500, { "content-type": 'text/plain '});
-            res.end('Server error');
-            return;
-        }
-
-        const statusCode = filePath ==='404.html' ? 404 : 200;
-        res.writeHead(statusCode, { 'content-type': 'text/html'});
-        res.end(data);
-    });
+app.get(['/', '/index'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'about.html'));
+});
 
+app.get('/contact', (req, res) => {
+    res.sendFile(path.join(__dirname, 'contact-me.html'));
+});
 
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, '404.html'));
+});
 
-server.listen(8080, () => {
-    console.log('Server running on port 8080');
+app.listen(3000, (error) => {
+    if (error) {
+        throw error;
+    }
+    console.log('My newly converted Express app is up and running on localhost:3000');
 });
